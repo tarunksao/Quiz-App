@@ -1,7 +1,8 @@
 const question = document.getElementById('question');
 const choices = Array.from(document.getElementsByClassName('choice-text'));
-const questionCounterText = document.getElementById('questionCounter');
+const progressText = document.getElementById('progressText');
 const scoreText = document.getElementById('score');
+const progressBarFull = document.getElementById('progressBarFull');
 
 let currentQuestion = {};
 let acceptingAnswers = false;
@@ -46,23 +47,27 @@ startGame = () => {
     score = 0;
     availableQuestions = [...questions];
     // console.log(availableQuestions);
+    getNewQuestion();
 }
 
 getNewQuestion = () => {
     if (availableQuestions.length === 0 || questionCounter >= MAX_QUESTIONS ) {
         //go to the end page
-
-        return window.location.assign('/end.html');
+        localStorage.setItem('score', score);
+        return window.location.assign('./end.html');
     }
     questionCounter++;
-    questionCounterText.innerText = `${questionCounter}/${MAX_QUESTIONS}`;
+    progressText.innerText = `Question ${questionCounter}/${MAX_QUESTIONS}`;
+    // Update the progress bar
+    progressBarFull.style.width = `${(questionCounter/MAX_QUESTIONS) * 100}%`;
+
     const questionIndex = Math.floor(Math.random() * availableQuestions.length);
     currentQuestion = availableQuestions[questionIndex];
     question.innerText = currentQuestion.question;
 
     choices.forEach( choice => {
-        const number = choice.dataSet['number'];
-        choice.innerText = currentQuestion['choice'+number];
+        const number = choice.dataset['number'];
+        choice.innerText = currentQuestion["choice"+number];
     });
 
     availableQuestions.splice(questionIndex, 1);
@@ -76,10 +81,10 @@ choices.forEach(choice => {
         if (!acceptingAnswers) return;
         acceptingAnswers = false;
         const selectedChoice = e.target;
-        const selectedAnswer = selectedChoice.dataSet['number'];
+        const selectedAnswer = selectedChoice.dataset['number'];
         // console.log(selectedAnswer);
 
-        const classToApply = 'incorrect';
+        let classToApply = 'incorrect';
         if (selectedAnswer == currentQuestion.answer){
             classToApply = 'correct';
         }
